@@ -1,6 +1,6 @@
 package com.iplus.studentManagement.service.impl;
 
-import com.iplus.studentManagement.entity.student;
+import com.iplus.studentManagement.entity.Student;
 import com.iplus.studentManagement.exception.ResourceFoundException;
 import com.iplus.studentManagement.exception.ResourceNotFoundException;
 import com.iplus.studentManagement.repository.StudentRepository;
@@ -23,23 +23,23 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Page<student> getAllStudents(Pageable pageable) {
+    public Page<Student> getAllStudents(Pageable pageable) {
         return studentRepository.findAll(pageable);
     }
 
     @Override
-    public List<student> getAllStudentsList() {
+    public List<Student> getAllStudentsList() {
         return studentRepository.findAll();
     }
 
     @Override
-    public student getStudentById(Long id) {
+    public Student getStudentById(Long id) {
         return studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + id));
     }
 
     @Override
-    public student saveStudent(student student) {
+    public Student saveStudent(Student student) {
         // Optional: Check for duplicate email
         if (student.getId() == null && studentRepository.existsByEmail(student.getEmail())) {
             throw new ResourceFoundException("Email already exists: " + student.getEmail());
