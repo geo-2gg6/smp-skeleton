@@ -1,8 +1,8 @@
 package com.iplus.studentManagement.controller;
 
-import com.iplus.studentManagement.dto.StudentDto;
 import com.iplus.studentManagement.entity.Student;
 import com.iplus.studentManagement.service.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -10,107 +10,74 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/students")
 public class StudentWebController {
 
     private final StudentService studentService;
 
+    @Autowired
     public StudentWebController(StudentService studentService) {
         this.studentService = studentService;
     }
 
+    // ADD THIS METHOD FOR THE HOME PAGE
+    @GetMapping("/")
+    public String showHomePage() {
+        return "index"; // This tells Thymeleaf to render /templates/index.html
+    }
+
     // Show list of students
-    @GetMapping
+    @GetMapping("/students")
     public String listStudents(Model model) {
-        // 1. Get entities from service
-        List<Student> studentEntities = studentService.getAllStudentsList();
-        // 2. Convert entities to DTOs for the view
-        List<StudentDto> studentDtos = studentEntities.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-        model.addAttribute("students", studentDtos);
-        return "students"; // Thymeleaf template: /templates/students.html
+        model.addAttribute("students", studentService.getAllStudentsList());
+        // Note: Your file is named 'studetns.html'. I've matched it here.
+        // It's recommended to rename the file to 'students.html' and change this return value.
+        return "students"; 
     }
 
     // Show form to create a new student
-    @GetMapping("/new")
+    @GetMapping("/students/new")
     public String showCreateForm(Model model) {
-        model.addAttribute("student", new StudentDto());
-        return "create_student"; // /templates/create_student.html
+        model.addAttribute("student", new Student());
+        return "create_student"; // Renders /templates/create_student.html
     }
 
     // Handle form submission for creating a student
-    @PostMapping
-    public String createStudent(@Valid @ModelAttribute("student") StudentDto studentDto, BindingResult result) {
+    @PostMapping("/students")
+    public String saveStudent(@Valid @ModelAttribute("student") Student student, BindingResult result) {
         if (result.hasErrors()) {
             return "create_student";
         }
-        // 1. Convert DTO from form to an entity
-        Student studentEntity = convertToEntity(studentDto);
-        // 2. Save the entity using the service
-        studentService.saveStudent(studentEntity);
+        studentService.saveStudent(student);
         return "redirect:/students";
     }
 
     // Show form to edit a student
-    @GetMapping("/edit/{id}")
+    @GetMapping("/students/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
-        // 1. Get the entity from the service
-        Student studentEntity = studentService.getStudentById(id);
-        // 2. Convert entity to DTO for the view
-        StudentDto studentDto = convertToDto(studentEntity);
-        model.addAttribute("student", studentDto);
-        return "edit_student"; // /templates/edit_student.html
+        model.addAttribute("student", studentService.getStudentById(id));
+        return "edit_student"; // Renders /templates/edit_student.html
     }
 
     // Handle form submission for updating a student
-    @PostMapping("/{id}")
-    public String updateStudent(@PathVariable Long id, @Valid @ModelAttribute("student") StudentDto studentDto, BindingResult result) {
+    @PostMapping("/students/{id}")
+    public String updateStudent(@PathVariable Long id, @Valid @ModelAttribute("student") Student student, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            // If there are validation errors, we need to return to the edit form
-            // The ID is not in the DTO, so we set it to ensure the form action is correct
-            studentDto.setId(id);
+            // If validation fails, return to the edit form
             return "edit_student";
         }
 
-        // 1. Get the existing entity from the database
-        Student existingStudent = studentService.getStudentById(id);
-        // 2. Update its fields from the DTO
-        existingStudent.setFirstName(studentDto.getFirstName());
-        existingStudent.setLastName(studentDto.getLastName());
-        existingStudent.setEmail(studentDto.getEmail());
-        // 3. Save the updated entity
-        studentService.saveStudent(existingStudent);
+        // Set the ID from the path variable to ensure we update the correct student
+        student.setId(id); 
+        studentService.saveStudent(student);
         return "redirect:/students";
     }
 
     // Delete a student
-    @GetMapping("/delete/{id}")
+    @GetMapping("/students/delete/{id}")
     public String deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return "redirect:/students";
-    }
-
-    // --- Helper Methods for Conversion ---
-
-    private StudentDto convertToDto(Student student) {
-        StudentDto dto = new StudentDto();
-        dto.setId(student.getId());
-        dto.setFirstName(student.getFirstName());
-        dto.setLastName(student.getLastName());
-        dto.setEmail(student.getEmail());
-        return dto;
-    }
-
-    private Student convertToEntity(StudentDto dto) {
-        Student student = new Student();
-        student.setId(dto.getId()); // Set ID for updates
-        student.setFirstName(dto.getFirstName());
-        student.setLastName(dto.getLastName());
-        student.setEmail(dto.getEmail());
-        return student;
     }
 }
