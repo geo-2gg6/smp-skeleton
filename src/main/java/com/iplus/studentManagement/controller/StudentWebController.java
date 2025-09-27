@@ -21,20 +21,24 @@ public class StudentWebController {
 
     @GetMapping("/")
     public String showHomePage() {
-        return "index"; // Renders /templates/index.html
+        return "index";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 
     @GetMapping("/students")
     public String listStudents(Model model) {
         model.addAttribute("students", studentService.getAllStudentsList());
-        // This MUST match your file name. Rename studetns.html to students.html
-        return "students"; 
+        return "students"; // This now correctly maps to students.html
     }
 
     @GetMapping("/students/new")
     public String showCreateForm(Model model) {
         model.addAttribute("student", new Student());
-        return "create_student"; // Renders /templates/create_student.html
+        return "create_student";
     }
 
     @PostMapping("/students")
@@ -49,7 +53,7 @@ public class StudentWebController {
     @GetMapping("/students/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
         model.addAttribute("student", studentService.getStudentById(id));
-        return "edit_student"; // Renders /templates/edit_student.html
+        return "edit_student";
     }
 
     @PostMapping("/students/{id}")

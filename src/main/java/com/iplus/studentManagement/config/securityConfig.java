@@ -16,13 +16,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class securityConfig {
 
-    // Bean to encode passwords
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Bean to create in-memory users for testing
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
@@ -38,27 +36,20 @@ public class securityConfig {
         return new InMemoryUserDetailsManager(user, admin);
     }
 
-    // Main security configuration
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Allow public access to static resources, the home page, login, and API
-                .requestMatchers("/", "/css/**", "/js/**", "/api/**", "/login", "/signup").permitAll()
-                // Only allow users with the 'ADMIN' role to access delete URLs
+                .requestMatchers("/", "/css/**", "/js/**", "/login", "/signup", "/api/**").permitAll()
                 .requestMatchers("/students/delete/**", "/courses/delete/**").hasRole("ADMIN")
-                // All other requests require the user to be authenticated
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                // Specify the custom login page URL
                 .loginPage("/login")
-                // Redirect to the home page on successful login
                 .defaultSuccessUrl("/", true)
                 .permitAll()
             )
             .logout(logout -> logout
-                // Redirect to the login page after logging out
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
             );
