@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
-    // Optional: check if email already exists
-    boolean existsByEmail(String email);
+    
+    // Custom method to find a student by their unique email
+    Student findByEmail(String email);
 }

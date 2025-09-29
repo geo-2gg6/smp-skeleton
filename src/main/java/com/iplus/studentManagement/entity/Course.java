@@ -1,84 +1,39 @@
 package com.iplus.studentManagement.entity;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set; // <--- New Import
 
 @Entity
 @Table(name = "courses")
 public class Course {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String code; // e.g., CSE101
+    @Column(name = "course_name", nullable = false)
+    private String courseName;
 
-    @Column(nullable = false)
-    private String name; // e.g., Data Structures
-
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    private int credits;
+    // --- FIX: Add OneToMany relationship with cascading delete ---
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Enrollment> enrollments = new HashSet<>();
+    // ------------------------------------------------------------
+    
+    // Default constructor
+    public Course() {}
 
-    public Course() {
-    }
-
-    public Course(Long id, String code, String name, String description, int credits) {
-        this.id = id;
-        this.code = code;
-        this.name = name;
-        this.description = description;
-        this.credits = credits;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getCredits() {
-        return credits;
-    }
-
-    public void setCredits(int credits) {
-        this.credits = credits;
-    }
-
-    @Override
-    public String toString() {
-        return "Course{" +
-                "id=" + id +
-                ", code='" + code + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", credits=" + credits +
-                '}';
-    }
+    // --- Getters and Setters ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    // Optional: Add getters/setters for enrollments
+    public Set<Enrollment> getEnrollments() { return enrollments; }
+    public void setEnrollments(Set<Enrollment> enrollments) { this.enrollments = enrollments; }
 }
